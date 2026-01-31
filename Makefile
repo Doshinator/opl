@@ -4,7 +4,7 @@ CXXFLAGS = -Wall -Wextra -std=c++23
 
 # Target and source files
 TARGET = main
-SRCS = main.cpp
+SRCS = src/main.cpp
 
 # Default target
 all: $(TARGET)
