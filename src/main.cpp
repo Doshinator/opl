@@ -1,63 +1,21 @@
 #include <print>
-
-class Expression {
-    public:
-        virtual ~Expression() = default;
-        virtual int eval() = 0;
-};
-
-class Num : public Expression {
-    private:
-        int n;
-    public:
-        Num(int n) { this->n = n; }
-        int eval() { return n; }
-};
-
-class Add : public Expression {
-    private:
-        Expression *lhs;
-        Expression *rhs;
-    public:
-        Add(Expression *lhs, Expression *rhs) {
-            this->lhs = lhs;
-            this->rhs = rhs;
-        }
-        ~Add() {
-            delete lhs;
-            delete rhs;
-        }
-
-        int eval() {
-            return lhs->eval() +  rhs->eval();
-        }
-        
-};
-
-class Multiply : public Expression {
-    private:
-        Expression *lhs;
-        Expression *rhs;
-    public:
-        Multiply(Expression *lhs, Expression *rhs) {
-            this->lhs = lhs;
-            this->rhs = rhs;
-        }
-        ~Multiply() {
-            delete lhs;
-            delete rhs;
-        }
-
-        int eval() {
-            return lhs->eval() * rhs->eval();
-        }
-};
+#include "expression.h"
 
 int main() {
     std::println("---- Start -----");
-
     
+    Expression* expr =
+        new Add(
+            new Num(2),
+            new Multiply(
+                new Num(3),
+                new Num(4)
+            )
+        );
 
+    std::println("Result = {}", expr->eval());
+    delete expr;
+    
     std::println("---- End -----");
     return 0;
 }
