@@ -1,12 +1,17 @@
 #include <print>
 
-class Expression {};
+class Expression {
+    public:
+        virtual ~Expression() = default;
+        virtual int eval() = 0;
+};
 
 class Num : public Expression {
     private:
         int n;
     public:
         Num(int n) { this->n = n; }
+        int eval() { return n; }
 };
 
 class Add : public Expression {
@@ -22,6 +27,11 @@ class Add : public Expression {
             delete lhs;
             delete rhs;
         }
+
+        int eval() {
+            return lhs->eval() +  rhs->eval();
+        }
+        
 };
 
 class Multiply : public Expression {
@@ -37,12 +47,17 @@ class Multiply : public Expression {
             delete lhs;
             delete rhs;
         }
-};
 
+        int eval() {
+            return lhs->eval() * rhs->eval();
+        }
+};
 
 int main() {
     std::println("---- Start -----");
+
     
+
     std::println("---- End -----");
     return 0;
 }
