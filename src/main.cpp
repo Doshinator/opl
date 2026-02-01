@@ -15,7 +15,7 @@ int main() {
 
     std::println("Result = {}", expr->eval());
     delete expr;
-    
+
     std::println("---- End -----");
     return 0;
 }

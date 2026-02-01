@@ -7,8 +7,8 @@ APP_TARGET = main
 TEST_TARGET = tests
 
 # Source files
-APP_SRCS = src/main.cpp src/expression.cpp
-TEST_SRCS = test/test_expression.cpp test/test_infra.cpp src/expression.cpp
+APP_SRCS = src/main.cpp src/expression.cpp src/s_expression.cpp
+TEST_SRCS = test/test_expression.cpp test/test_infra.cpp src/expression.cpp src/s_expression.cpp
 
 # Default target
 all: $(APP_TARGET)
