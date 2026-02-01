@@ -3,26 +3,24 @@
 
 class SExpression {
     public:
-        SExpression();
+        virtual ~SExpression() = default;
+        SExpression() = default;
 };
 
 class SSymbol : public SExpression {
-    private:
-        std::string name;
     public:
-        SSymbol(std::string name);
+        std::string name;
+        SSymbol(const std::string& name);
 };
 
 class SNumber : public SExpression {
-    private:
-        int val;
     public:
+        int val;
         SNumber(int val);
 };
 
 class SList : public SExpression {
-    private:
-        std::vector<std::unique_ptr<SExpression>> *s_list;
     public:
-        SList(std::vector<std::unique_ptr<SExpression>> *expr);
+        std::vector<std::unique_ptr<SExpression>> elements;
+        SList() = default;
 };
