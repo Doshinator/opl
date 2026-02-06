@@ -1,4 +1,4 @@
-use opl::{expression::{Expr, eval}, reader, s_expression::SExpr};
+use opl::{expression::{Expr, eval}};
 
 fn main() {
     println!("---- Start -----");
@@ -13,15 +13,6 @@ fn main() {
 
     // (+ 2 (* 3 4))
     // hand written
-    let s_exprs = SExpr::SExprList(vec![
-        Box::new(SExpr::SESym("+".into())),
-        Box::new(SExpr::SExprNum(2)),
-            Box::new(SExpr::SExprList(vec![
-                Box::new(SExpr::SESym("*".into())),
-                Box::new(SExpr::SExprNum(3)),
-                Box::new(SExpr::SExprNum(4)),
-            ]))
-    ]);
 
     println!("---- End -----");
 }

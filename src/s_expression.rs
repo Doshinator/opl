@@ -15,5 +15,27 @@ pub enum SExpr {
  */
 
 pub fn reader(str: &str) -> SExpr {
-    todo!()
+    let mut it = str.chars().peekable();
+    read_expr(&mut it)
+}
+
+fn read_expr(it: &mut Peekable<Chars>) -> SExpr {
+    skip_white_space(it);
+
+    match it.peek() {
+        Some('(') => read_list(it),
+        Some(_) => read_atom(it),
+        None => panic!("Unexpected input"),
+    }
+}
+
+fn skip_white_space(it: &mut Peekable<Chars>) {
+    while let Some(c) = it.peek() {
+        if c.is_whitespace() {
+            it.next();
+        }
+        else {
+            break;
+        }
+    }
 }
