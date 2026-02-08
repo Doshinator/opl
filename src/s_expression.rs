@@ -39,3 +39,47 @@ fn skip_white_space(it: &mut Peekable<Chars>) {
         }
     }
 }
+
+// should return a list
+fn read_list(it: &mut Peekable<Chars>) -> SExpr {
+    // ( + e e )
+    it.next(); // consume + 2 3 )
+    let mut elements = Vec::new();
+    loop {
+        skip_white_space(it);
+
+        match it.peek() {
+            Some(')') => {
+                it.next();
+                break;
+            },
+            Some(_) => {
+                let expr = read_expr(it);
+                elements.push(expr);
+            },
+            None => panic!("Unexpected input"),
+        }
+    }
+
+    SExpr::List(elements)
+}
+
+
+// A number or a symbol 
+// ( + 2 3 ) put everything inside the () into a
+fn read_atom(it: &mut Peekable<Chars>) -> SExpr {
+    let mut s = String::new();
+
+    while let Some(ch) = it.peek() {
+        if ch.is_whitespace() || *ch == '(' || *ch == ')' {
+            break;
+        }
+        s.push(it.next().unwrap());
+    }
+
+    if let Ok(n) = s.parse::<i64>() {
+        SExpr::Num(n)
+    } else {
+        SExpr::Sym(s)
+    }
+}
