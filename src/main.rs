@@ -1,4 +1,4 @@
-use opl::expression::{Expr, eval};
+use opl::{expression::{Expr, eval}};
 
 fn main() {
     println!("---- Start -----");
@@ -10,6 +10,9 @@ fn main() {
         )),
     );
     println!("{}", eval(&e));
+
+    // (+ 2 (* 3 4))
+    // hand written
 
     println!("---- End -----");
 }
