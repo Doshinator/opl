@@ -1,5 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum SExpr {
     Num(i64),
     Sym(String),
