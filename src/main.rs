@@ -1,4 +1,4 @@
-use opl::{desugar::{self, desugar}, expression::{Expr, eval}, s_expression::SExpr};
+use opl::expression::{Expr, eval};
 
 fn main() {
     println!("---- Start -----");

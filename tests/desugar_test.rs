@@ -1,4 +1,4 @@
-use opl::{Expr, desugar::desugar, eval, s_expression::SExpr};
+use opl::{Expr, desugar::desugar, s_expression::SExpr};
 
 
 #[test]
