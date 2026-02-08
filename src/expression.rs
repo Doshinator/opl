@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Expr {
     Num(i32),
     Add(Box<Expr>, Box<Expr>),
