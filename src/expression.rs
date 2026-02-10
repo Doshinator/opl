@@ -1,11 +1,11 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expr {
-    Num(i32),
+    Num(i64),
     Add(Box<Expr>, Box<Expr>),
     Multiply(Box<Expr>, Box<Expr>),
 }
 
-pub fn eval(expr: &Expr) -> i32 {
+pub fn eval(expr: &Expr) -> i64 {
     match expr {
         Expr::Num(n) => *n,
         Expr::Add(l, r) => eval(l) + eval(r),
