@@ -1,4 +1,4 @@
-use opl::expression::{Expr, eval};
+use opl::expression::{Expr, eval, pretty_print};
 
 fn main() {
     println!("---- Start -----");
