@@ -15,7 +15,7 @@
  */
 
 #[derive(Debug, PartialEq, Clone)]
-enum Expr {
+pub enum Expr {
     Num(i32),
     Bool(bool),
     Var(String),
@@ -45,7 +45,7 @@ enum Expr {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-enum Prim {
+pub enum Prim {
     Add,
     Mul,
     Sub,

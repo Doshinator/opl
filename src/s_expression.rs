@@ -43,7 +43,7 @@ fn skip_white_space(it: &mut Peekable<Chars>) {
 
 // should return a list
 fn read_list(it: &mut Peekable<Chars>) -> SExpr {
-    // ( + e e )
+    // (+ e e)
     it.next(); // consume + 2 3 )
     let mut elements = Vec::new();
     loop {
