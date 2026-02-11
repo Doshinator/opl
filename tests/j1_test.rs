@@ -1,4 +1,4 @@
-use opl::{desugar::desugar, eval, j1::{Expr, pretty_print}, reader};
+use opl::{desugar::desugar, reader};
 
 #[test]
 fn j1_add() {
