@@ -27,5 +27,5 @@ fn j1_subtract() {
 fn run(program: &str) -> i64 {
     let sexpr = reader(program);
     let expr = desugar(&sexpr);
-    eval(&expr)
+    todo!()
 }

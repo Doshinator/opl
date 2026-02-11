@@ -1,4 +1,3 @@
-
 /**
  * Expr = 
   Num(i32)
@@ -16,7 +15,7 @@
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
-    Num(i32),
+    Num(i64),
     Bool(bool),
     Var(String),
     Prim(Prim),
