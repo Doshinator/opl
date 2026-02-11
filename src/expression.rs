@@ -12,3 +12,11 @@ pub fn eval(expr: &Expr) -> i64 {
         Expr::Multiply(l, r) => eval(l) * eval(r),
     }
 }
+
+pub fn pretty_print(e: &Expr) -> String {
+    match e {
+        Expr::Num(n) => n.to_string(),
+        Expr::Add(l, r) => format!("(+ {} {})", pretty_print(l), pretty_print(r)),
+        Expr::Multiply(l, r) => format!("(* {} {})", pretty_print(l), pretty_print(r)),
+    }
+}
