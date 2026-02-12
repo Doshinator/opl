@@ -50,8 +50,6 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                 },
                 _ => panic!("First element must be a symbole"),
             }
-
-
         },
     }
 }

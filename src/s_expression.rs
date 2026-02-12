@@ -67,7 +67,7 @@ fn read_list(it: &mut Peekable<Chars>) -> SExpr {
 
 
 // A number or a symbol 
-// ( + 2 3 ) put everything inside the () into a
+// (+ 2 3) put everything inside the () into a
 fn read_atom(it: &mut Peekable<Chars>) -> SExpr {
     let mut s = String::new();
 

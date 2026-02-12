@@ -1,4 +1,4 @@
-use opl::{desugar, expression::{Expr, eval}, reader};
+use opl::{desugar, expression::{Expr, eval, pretty_print}, reader};
 
 #[test]
 fn eval_num() {
@@ -59,6 +59,72 @@ fn j1_num() {
         5,
         result,
     )
+}
+
+#[test]
+fn j1_subtract() {
+    let program = "(- 5 5)";
+    let actual = run(program);
+    
+    assert_eq!(
+        0,
+        actual,
+    )
+}
+
+#[test]
+fn j1_divide() {
+    let program = "(/ 15 5)";
+    let actual = run(program);
+
+    assert_eq!(
+        3,
+        actual,
+    )
+}
+
+#[test]
+fn j1_nested_arithmetics() {
+    let program = "(+ 2 (* 3 4))";
+    let actual = run(program);
+
+    assert_eq!(
+        14,
+        actual,
+    );
+}
+
+#[test]
+fn j1_deep_nesting() {
+    let program = "(* (+ 1 2) (+ 10 4))";
+    let actual = run(program);
+
+    assert_eq!(
+        42,
+        actual,
+    );
+}
+
+#[test]
+fn j1_negative_numbers() {
+    let program = "(* -3 5)";
+    let actual = run(program);
+
+    assert_eq!(
+        -15,
+        actual,
+    );
+}
+
+#[test]
+fn j1_complex_expression() {
+    let program = "(+ (* 2 3) (/ 8 2))";
+    let actual = run(program);
+
+    assert_eq!(
+        10,
+        actual,
+    );
 }
 
 // Helper function to run the program
