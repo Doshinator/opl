@@ -40,7 +40,7 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                             let left = desugar(&rest[0]);
                             let right = desugar(&rest[1]);
                             
-                            Expr::Multiply(
+                            Expr::Mul(
                                 Box::new(left),
                                 Box::new(right)
                             )
@@ -50,8 +50,6 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                 },
                 _ => panic!("First element must be a symbole"),
             }
-
-
         },
     }
 }
