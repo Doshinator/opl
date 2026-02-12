@@ -49,7 +49,7 @@ fn desugar_multiply() {
         SExpr::Num(4),
     ]);
 
-    let actual = Expr::Multiply(
+    let actual = Expr::Mul(
         Box::new(Expr::Num(3)), 
         Box::new(Expr::Num(4))
     );
@@ -80,7 +80,7 @@ fn desugar_nested() {
     let expected = Expr::Add(
         Box::new(Expr::Num(2)),
         Box::new(
-            Expr::Multiply(
+            Expr::Mul(
                 Box::new(Expr::Num(3)),
                 Box::new(Expr::Num(4)),
             )

@@ -2,7 +2,7 @@ use std::{iter::Peekable, str::Chars};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum SExpr {
-    Num(i64),
+    Num(i32),
     Sym(String),
     List(Vec<SExpr>),
 }
@@ -78,7 +78,7 @@ fn read_atom(it: &mut Peekable<Chars>) -> SExpr {
         s.push(it.next().unwrap());
     }
 
-    if let Ok(n) = s.parse::<i64>() {
+    if let Ok(n) = s.parse::<i32>() {
         SExpr::Num(n)
     } else {
         SExpr::Sym(s)
