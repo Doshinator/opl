@@ -9,7 +9,7 @@ fn main() {
             Box::new(Expr::Num(4))
         )),
     );
-    println!("{} = {}", 
+    println!("{} = {:?}", 
         pretty_print(&e),
         eval(&e)
     );

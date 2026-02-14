@@ -58,11 +58,96 @@ pub enum Prim {
     Equal,
 }
 
-pub fn eval(expr: &Expr) -> i32 {
+#[derive(Debug, PartialEq, Clone)]
+pub enum Value {
+    Num(i32),
+    Bool(bool),
+}
+
+pub fn eval(expr: &Expr) -> Value {
     match expr {
-        Expr::Num(n) => *n,
-        Expr::Add(l, r) => eval(l) + eval(r),
-        Expr::Mul(l, r) => eval(l) * eval(r),
+        Expr::Num(n) => Value::Num(*n),
+        Expr::Bool(b) => Value::Bool(*b),
+        Expr::Add(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => Value::Num(a + b),
+                _ => panic!("Type error: + expects two numbers"),
+            }
+        },
+        Expr::Mul(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => Value::Num(a * b),
+                _ => panic!("Type error: * expects two numbers"),
+            }
+        },
+        Expr::Sub(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => Value::Num(a - b),
+                _ => panic!("Type error: - expects two numbers"),
+            }
+        },
+        Expr::Div(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    if b == 0 {
+                        panic!("divide by zero error");
+                    }
+                    Value::Num(a / b)
+                },
+                _ => panic!("Type error: / expects two numbers"),
+            }
+        },
+        Expr::Less(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    Value::Bool(a < b)
+                },
+                _ => panic!("Type error: < expects two numbers"),
+            }
+        },
+        Expr::LessEq(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    Value::Bool(a <= b)
+                },
+                _ => panic!("Type error: <= expects two numbers"),
+            }
+        },
+        Expr::Greater(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    Value::Bool(a > b)
+                },
+                _ => panic!("Type error: > expects two numbers"),
+            }
+        },
+        Expr::GreaterEq(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    Value::Bool(a >= b)
+                },
+                _ => panic!("Type error: ?= expects two numbers"),
+            }
+        },
+        Expr::Equal(l, r) => {
+            match (eval(l), eval(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    Value::Bool(a == b)
+                },
+                _ => panic!("Type error: == expects two numbers"),
+            }
+        },
+        Expr::If(cond, then_expr, else_expr) => {
+            match eval(cond) {
+                Value::Bool(true) => eval(then_expr),
+                Value::Bool(false) => eval(else_expr),
+                _ => panic!("Type error: if condition must be a boolean"),
+            }
+        },
+        Expr::Var(_) => panic!("Variables not yet implemented (needed for J2+)"),
+        Expr::Lambda(_, _) => panic!("Lambda not yet implemented (needed for J2+)"),
+        Expr::App(_, _) => panic!("Application not yet implemented (needed for J2+)"),
+        Expr::Prim(_) => panic!("Primitives not yet implemented"),
         _ => {
             panic!("Unexpected expression");
         }

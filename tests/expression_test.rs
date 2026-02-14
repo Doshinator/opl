@@ -1,10 +1,10 @@
-use opl::{desugar, expression::{Expr, eval, pretty_print}, reader};
+use opl::{desugar, expression::{Expr, Value, eval, pretty_print}, reader};
 
 #[test]
 fn eval_num() {
     let e = Expr::Num(5);
     let n = eval(&e);
-    assert_eq!(5, n);
+    assert_eq!(Value::Num(5), n);
 }
 
 #[test]
@@ -14,7 +14,7 @@ fn eval_add() {
         Box::new(Expr::Num(-4))
     );
     let n = eval(&e);
-    assert_eq!(-1, n);
+    assert_eq!(Value::Num(-1), n);
 }
 
 #[test]
@@ -24,9 +24,12 @@ fn eval_multiply() {
         Box::new(Expr::Num(-4))
     );
     let n = eval(&e);
-    assert_eq!(-12, n);
+    assert_eq!(Value::Num(-12), n);
 }
 
+// ============================================================================
+// J1 TESTS - NEW (Step 9: Test Suite for J1)
+// ============================================================================
 
 #[test]
 fn j1_add() {
@@ -132,5 +135,8 @@ fn run(program: &str) -> i32 {
     let sexpr = reader(program);
     let expr = desugar(&sexpr);
     let result = eval(&expr);
-    result
+    match result {
+        Value::Num(n) => n,
+        _ => panic!("Expected numeric result, got {:?}", result),
+    }
 }

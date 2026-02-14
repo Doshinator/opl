@@ -32,6 +32,19 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                                 Box::new(right)
                             )
                         },
+                        "-" => {
+                            if rest.len() != 2 {
+                                panic!("- expects at least 2 args");
+                            }
+
+                            let left = desugar(&rest[0]);
+                            let right = desugar(&rest[1]);
+
+                            Expr::Sub(
+                                Box::new(left), 
+                                Box::new(right)
+                            )
+                        },
                         "*" => {
                             if rest.len() != 2 {
                                 panic!("* expects at least 2 args");
