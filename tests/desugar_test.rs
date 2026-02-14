@@ -1,4 +1,4 @@
-use opl::{Expr, desugar::desugar, eval, s_expression::SExpr};
+use opl::{Expr, desugar::desugar, eval, expression::Value, s_expression::SExpr};
 
 
 #[test]
@@ -108,5 +108,5 @@ fn desugar_then_eval() {
     let expr = desugar(&se);
     let result = eval(&expr);
 
-    assert_eq!(14, result);
+    assert_eq!(Value::Num(14), result);
 }
