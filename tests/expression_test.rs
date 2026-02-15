@@ -1,4 +1,4 @@
-use opl::{desugar, expression::{Expr, Value, eval, pretty_print}, reader};
+use opl::{desugar, expression::{Expr, Value, eval}, reader};
 
 #[test]
 fn eval_num() {
