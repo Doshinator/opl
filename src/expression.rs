@@ -148,9 +148,6 @@ pub fn eval(expr: &Expr) -> Value {
         Expr::Lambda(_, _) => panic!("Lambda not yet implemented (needed for J2+)"),
         Expr::App(_, _) => panic!("Application not yet implemented (needed for J2+)"),
         Expr::Prim(_) => panic!("Primitives not yet implemented"),
-        _ => {
-            panic!("Unexpected expression");
-        }
     }
 }
 

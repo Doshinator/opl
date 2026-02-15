@@ -133,45 +133,37 @@ fn j1_complex_expression() {
 #[test]
 fn j1_less_condition() {
     let program = "(< 1 10)";
-    let actual = run(program);
-
-    assert_eq!(
-        1,
-        actual,
-    )
+    let actual = run_bool(program);
+    assert_eq!(true, actual);
 }
 
 #[test]
 fn j1_greater_condition() {
     let program = "(> 1 10)";
-    let actual = run(program);
-    assert_eq!(0, actual);
+    let actual = run_bool(program);
+    assert_eq!(false, actual);
 
     let program = "(> 10 1)";
-    let actual = run(program);
-    assert_eq!(1, actual)
+    let actual = run_bool(program);
+    assert_eq!(true, actual)
 }
 
 #[test]
 fn j1_less_eq_condition() {
     let program = "(<= 10 10)";
-    let actual = run(program);
-
-    assert_eq!(
-        1,
-        actual,
-    )
+    let actual = run_bool(program);
+    assert_eq!(true, actual)
 }
 
 #[test]
 fn j1_equal_condition() {
-    let program = "(== 10 10)";
-    let actual = run(program);
-    assert_eq!(1, actual);
+    let program = "(= 10 10)";
+    let actual = run_bool(program);
+    assert_eq!(true, actual);
     
-    let program = "(== 5 10)";
-    let actual = run(program);
-    assert_eq!(0, actual);
+    let program = "(= 5 10)";
+    let actual = run_bool(program);
+    assert_eq!(false, actual);
 }
 
 #[test]
@@ -180,7 +172,7 @@ fn j1_if_conditional() {
     let actual = run(program);
     assert_eq!(10, actual);
     
-    let program = "(if (== 5 2) 10 20)";
+    let program = "(if (= 5 2) 10 20)";
     let actual = run(program);
     assert_eq!(20, actual);
 }
@@ -206,6 +198,34 @@ fn j1_if_nested() {
     assert_eq!(1, result);
 }
 
+#[test]
+fn j1_bool_true() {
+    let program = "true";
+    let result = run_bool(program);
+    assert_eq!(true, result);
+}
+
+#[test]
+fn j1_bool_false() {
+    let program = "false";
+    let result = run_bool(program);
+    assert_eq!(false, result);
+}
+
+#[test]
+fn j1_if_true_branch() {
+    let program = "(if true 10 20)";
+    let result = run(program);
+    assert_eq!(10, result);
+}
+
+#[test]
+fn j1_complex_condition() {
+    let program = "(if (> 10 5) (+ 2 3) (* 4 5))";
+    let result = run(program);
+    assert_eq!(5, result);
+}
+
 // Helper function to run the program
 fn run(program: &str) -> i32 {
     let sexpr = reader(program);
@@ -213,12 +233,16 @@ fn run(program: &str) -> i32 {
     let result = eval(&expr);
     match result {
         Value::Num(n) => n,
-        Value::Bool(b) => {
-            match b {
-                false => 0,
-                true => 1,
-            }
-        },
         _ => panic!("Expected numeric result, got {:?}", result),
+    }
+}
+
+fn run_bool(program: &str) -> bool {
+    let sexpr = reader(program);
+    let expr = desugar(&sexpr);
+    let result = eval(&expr);
+    match result {
+        Value::Bool(b) => b,
+        _ => panic!("Expected boolean result, got {:?}", result),
     }
 }

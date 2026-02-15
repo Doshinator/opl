@@ -25,15 +25,15 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
             match first {
                 SExpr::Sym(op) => {
                     match op.as_str() {
-                        "+" => desguar_binary_op(op, rest),
-                        "-" => desguar_binary_op(op, rest),
-                        "*" => desguar_binary_op(op, rest),
-                        "/" => desguar_binary_op(op, rest),
+                        "+" => desugar_binary_op(op, rest),
+                        "-" => desugar_binary_op(op, rest),
+                        "*" => desugar_binary_op(op, rest),
+                        "/" => desugar_binary_op(op, rest),
                         "<" => desugar_conditional(op, rest),
                         "<=" => desugar_conditional(op, rest),
                         ">" => desugar_conditional(op, rest),
                         ">=" => desugar_conditional(op, rest),
-                        "==" => desugar_conditional(op, rest),
+                        "=" => desugar_conditional(op, rest),
                         "if" => {
                             if rest.len() != 3 {
                                 panic!("if expects 3 args: (if condition then-expr else-expr)")
@@ -58,7 +58,7 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
     }
 }
 
-fn desguar_binary_op(op: &str, rest: &[SExpr]) -> Expr {
+fn desugar_binary_op(op: &str, rest: &[SExpr]) -> Expr {
     if rest.len() != 2 {
         panic!("{} expects at least 2 args", op);
     }
@@ -101,7 +101,7 @@ fn desugar_conditional(op: &str, rest: &[SExpr]) -> Expr {
             let right = desugar(&rest[1]);
             Expr::GreaterEq(Box::new(left), Box::new(right))
         },
-        "==" => {
+        "=" => {
             let left = desugar(&rest[0]);
             let right = desugar(&rest[1]);
             Expr::Equal(Box::new(left), Box::new(right))
