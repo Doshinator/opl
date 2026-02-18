@@ -5,3 +5,4 @@ pub mod context;
 pub use expression::{Expr, Value, eval};
 pub use s_expression::reader;
 pub use desugar::desugar;
+pub use context::Context;
