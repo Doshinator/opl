@@ -40,4 +40,8 @@ impl Context {
     pub fn is_hole(&self) -> bool {
         matches!(self, Context::Hole)
     }
+
+    pub fn plug(ctx: &Context, expr: &Expr) -> Expr {
+        todo!()
+    }
 }
