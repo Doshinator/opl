@@ -57,7 +57,7 @@ fn nested_context_add_mult() {
         Context::AddR(left_value, inner) => {
             assert_eq!(left_value, Value::Num(2));
             
-            match &*inner {
+            match inner.as_ref() {
                 Context::MulL(mul_inner, r) => {
                     assert!(mul_inner.is_hole());
                     assert_eq!(**r, Expr::Num(4));
@@ -71,8 +71,7 @@ fn nested_context_add_mult() {
 
 #[test]
 fn context_deeply_nested() {
-    // Represents: (+ 1 (* 2 (- HOLE 3)))
-    // Add 1 to (Multiply 2 by (Subtract HOLE from 3))
+    // (+ 1 (* 2 (- HOLE 3)))
     let ctx = Context::AddR(
         Value::Num(1),
         Box::new(Context::MulR(
@@ -86,7 +85,7 @@ fn context_deeply_nested() {
     
     // Just verify it compiles and has right structure
     match ctx {
-        Context::AddR(_, inner) => match &*inner {
+        Context::AddR(_, inner) => match inner.as_ref() {
             Context::MulR(_, inner2) => match &**inner2 {
                 Context::SubL(hole, _) => assert!(hole.is_hole()),
                 _ => panic!("Expected SubL"),
