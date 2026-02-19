@@ -40,8 +40,30 @@ impl Context {
     pub fn is_hole(&self) -> bool {
         matches!(self, Context::Hole)
     }
+}
 
-    pub fn plug(ctx: &Context, expr: &Expr) -> Expr {
-        todo!()
+pub fn plug(ctx: &Context, expr: Expr) -> Expr {
+    match ctx {
+        Context::Hole => expr,
+        Context::AddL(inner, right) => {
+            let filled = plug(inner, expr);
+            Expr::Add(Box::new(filled), right.clone())
+        },
+        Context::AddR(left_val, inner) => {
+            let filled = plug(inner, expr);
+            Expr::Add(
+                Box::new(value_to_expr(left_val)),
+                Box::new(filled),
+            )
+        },
+        // todo!() fill the rest of the cases
+        _=> panic!(""),
+    }
+}
+
+fn value_to_expr(val: &Value) -> Expr {
+    match val {
+        Value::Num(n) => Expr::Num(*n),
+        Value::Bool(b) => Expr::Bool(*b),
     }
 }
