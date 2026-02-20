@@ -51,12 +51,16 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
         },
         Context::AddR(left_val, inner_ctx) => {
             let filled = plug(inner_ctx, expr);
-            Expr::Add(
-                Box::new(value_to_expr(left_val)),
-                Box::new(filled),
-            )
+            Expr::Add(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
-        // todo!() fill the rest of the cases
+        Context::SubL(inner_ctx, right_expr) => {
+            let filled = plug(&inner_ctx, expr);
+            Expr::Sub(Box::new(filled), right_expr.clone())
+        },
+        Context::SubR(left_val, inner_ctx) => {
+            let filled = plug(&inner_ctx, expr);
+            Expr::Sub(Box::new(value_to_expr(left_val)), Box::new(filled))
+        },
         _=> panic!(""),
     }
 }
