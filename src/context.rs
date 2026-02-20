@@ -45,12 +45,12 @@ impl Context {
 pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     match ctx {
         Context::Hole => expr,
-        Context::AddL(inner, right) => {
-            let filled = plug(inner, expr);
-            Expr::Add(Box::new(filled), right.clone())
+        Context::AddL(inner_ctx, right_expr) => {
+            let filled = plug(inner_ctx, expr);
+            Expr::Add(Box::new(filled), right_expr.clone())
         },
-        Context::AddR(left_val, inner) => {
-            let filled = plug(inner, expr);
+        Context::AddR(left_val, inner_ctx) => {
+            let filled = plug(inner_ctx, expr);
             Expr::Add(
                 Box::new(value_to_expr(left_val)),
                 Box::new(filled),
