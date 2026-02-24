@@ -1,4 +1,4 @@
-use opl::{Context, Expr, Value};
+use opl::{Context, Expr, Value, context::plug};
 
 #[test]
 fn context_hole() {
@@ -94,4 +94,35 @@ fn context_deeply_nested() {
         },
         _ => panic!("Expected AddR"),
     }
+}
+
+
+#[test]
+fn test_plug_add_left() {
+    let ctx = Context::AddL(
+        Box::new(Context::Hole), 
+        Box::new(Expr::Num(5))
+    );
+
+    let result = plug(&ctx, Expr::Num(3));
+
+    assert_eq!(result, Expr::Add(
+        Box::new(Expr::Num(3)),
+        Box::new(Expr::Num(5))
+    ));
+}
+
+#[test]
+fn test_plug_add_right() {
+    let ctx = Context::AddR(
+        Value::Num(12), 
+        Box::new(Context::Hole)
+    );
+
+    let result = plug(&ctx, Expr::Num(5));
+
+    assert_eq!(result, Expr::Add(
+        Box::new(Expr::Num(12)), 
+        Box::new(Expr::Num(5))
+    ));
 }
