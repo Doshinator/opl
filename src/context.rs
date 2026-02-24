@@ -52,7 +52,7 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
             Expr::Add(Box::new(filled), right_expr.clone())
         },
         Context::SubL(inner_ctx, right_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Sub(Box::new(filled), right_expr.clone())
         },
         Context::MulL(inner_ctx, right_expr) => {
@@ -69,33 +69,37 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
             Expr::Add(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
         Context::SubR(left_val, inner_ctx) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Sub(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
         Context::MulR(left_val, inner_ctx) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Mul(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
         Context::DivR(left_val, inner_ctx) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Div(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
         // Comparison - Left side
         Context::LessL(inner_ctx, right_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Less(Box::new(filled), right_expr.clone())
         },
         Context::LessEqL(inner_ctx, right_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::LessEq(Box::new(filled), right_expr.clone())
         },
         Context::GreaterL(inner_ctx, right_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::Greater(Box::new(filled), right_expr.clone())
         },
         Context::GreaterEqL(inner_ctx, right_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::GreaterEq(Box::new(filled), right_expr.clone())
+        },
+        Context::EqualL(inner_ctx, right_expr) => {
+            let filled = plug(inner_ctx, expr);
+            Expr::Equal(Box::new(filled), right_expr.clone())
         },
         // Comparison - Right side
         Context::LessR(left_val, inner_ctx) => {
@@ -110,20 +114,23 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
             let filled = plug(inner_ctx, expr);
             Expr::Greater(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
+        Context::EqualR(left_val, inner_ctx) => {
+            let filled = plug(inner_ctx, expr);
+            Expr::Equal(Box::new(value_to_expr(left_val)), Box::new(filled))
+        },
         Context::GreaterEqR(left_val, inner_ctx) => {
             let filled = plug(inner_ctx, expr);
             Expr::GreaterEq(Box::new(value_to_expr(left_val)), Box::new(filled))
         },
         // If 
         Context::If(inner_ctx, then_expr, else_expr) => {
-            let filled = plug(&inner_ctx, expr);
+            let filled = plug(inner_ctx, expr);
             Expr::If(
                 Box::new(filled), 
                 then_expr.clone(), 
                 else_expr.clone()
             )
         },
-        _=> panic!(""),
     }
 }
 
