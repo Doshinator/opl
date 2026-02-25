@@ -134,9 +134,25 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     }
 }
 
+fn find_redex(expr: &Expr) -> Option<(Context, Expr)> {
+    todo!()
+}
+
 fn value_to_expr(val: &Value) -> Expr {
     match val {
         Value::Num(n) => Expr::Num(*n),
         Value::Bool(b) => Expr::Bool(*b),
+    }
+}
+
+fn is_value(expr: &Expr) -> bool {
+    matches!(expr, Expr::Num(_) | Expr::Bool(_))
+}
+
+fn expr_to_value(expr: &Expr) -> Value {
+    match expr {
+        Expr::Num(n) => Value::Num(*n),
+        Expr::Bool(b) => Value::Bool(*b),
+        _ => panic!("expr_to_value called on non-value"),
     }
 }
