@@ -151,12 +151,14 @@ pub fn find_redex(expr: &Expr) -> Option<(Context, Expr)> {
         Expr::Equal(l, r) => find_binop_redex(expr, l, r, Context::EqualL, Context::EqualR),
         // Condition
         Expr::If(cond, then_expr, else_expr) => {
-            if !is_value(cond) {
-                let (inner_ctx, redex) = find_redex(cond)?;
-                Some((Context::If(Box::new(inner_ctx), then_expr.clone(), else_expr.clone()), redex))
-            }
-            else {
+            if is_value(cond) {
                 Some((Context::Hole, expr.clone()))
+            } else {
+                let (inner_ctx, redex) = find_redex(cond)?;
+                Some((
+                    Context::If(Box::new(inner_ctx), then_expr.clone(), else_expr.clone()),
+                    redex
+                ))
             }
         },
         // For now, variables, lambdas, apps are not handled
@@ -183,6 +185,9 @@ fn expr_to_value(expr: &Expr) -> Value {
     }
 }
 
+// Helper function for finding redexes in binary operations.
+// Handles the common pattern: check if both operands are values (redex),
+// recurse left if needed, or recurse right if needed.
 fn find_binop_redex<L, R>(
     expr: &Expr,
     l: &Expr,
