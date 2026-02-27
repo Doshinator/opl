@@ -1,4 +1,4 @@
-use opl::{Context, Expr, Value, context::plug};
+use opl::{Context, Expr, Value, context::{find_redex, plug}};
 
 #[test]
 fn context_hole() {
@@ -256,4 +256,28 @@ fn test_plug_deep_recursive() {
             ))
         )
     );
+}
+
+#[test]
+fn find_redex_simple_value() {
+    let expr = Expr::Num(42);
+    let result = find_redex(&expr);
+    
+    assert!(result.is_some());
+    let (ctx, redex) = result.unwrap();
+    assert_eq!(ctx, Context::Hole);
+    assert_eq!(redex, Expr::Num(42));
+}
+
+#[test]
+fn find_redex_simple_add() {
+    let expr = Expr::Add(
+        Box::new(Expr::Num(2)),
+        Box::new(Expr::Num(3))
+    );
+    let result = find_redex(&expr);
+    
+    assert!(result.is_some());
+    let (ctx, _redex) = result.unwrap();
+    assert_eq!(ctx, Context::Hole);
 }

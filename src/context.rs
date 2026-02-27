@@ -45,7 +45,6 @@ impl Context {
 pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     match ctx {
         Context::Hole => expr,
-
         // Arithemtic - Left Side
         Context::AddL(inner_ctx, right_expr) => {
             let filled = plug(inner_ctx, expr);
@@ -134,9 +133,171 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     }
 }
 
+pub fn find_redex(expr: &Expr) -> Option<(Context, Expr)> {
+    match expr {
+        Expr::Num(_) | Expr::Bool(_) => {
+            Some((Context::Hole, expr.clone()))
+        },
+        // Arithematic
+        Expr::Add(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            // left side is not a value - we need to recurse
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::AddL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            // right side needs to be evaluated - recurse
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::AddR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::Sub(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::SubL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_val = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::SubR(left_val, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::Mul(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::MulL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::MulR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::Div(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::DivL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::DivR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        // Comparison
+        Expr::Less(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::LessL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::LessR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::LessEq(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::LessEqL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::LessEqR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::Greater(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::GreaterL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::GreaterR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::GreaterEq(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::GreaterEqL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::GreaterEqR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        Expr::Equal(l, r) => {
+            if is_value(l) && is_value(r) {
+                Some((Context::Hole, expr.clone()))
+            }
+            else if !is_value(l) {
+                let (inner_ctx, redex) = find_redex(l)?;
+                Some((Context::EqualL(Box::new(inner_ctx), r.clone()), redex))
+            }
+            else {
+                let left_value = expr_to_value(l);
+                let (inner_ctx, redex) = find_redex(r)?;
+                Some((Context::EqualR(left_value, Box::new(inner_ctx)), redex))
+            }
+        },
+        // Condition
+        Expr::If(cond, then_expr, else_expr) => {
+            if !is_value(cond) {
+                let (inner_ctx, redex) = find_redex(cond)?;
+                Some((Context::If(Box::new(inner_ctx), then_expr.clone(), else_expr.clone()), redex))
+            }
+            else {
+                Some((Context::Hole, expr.clone()))
+            }
+        },
+        // For now, variables, lambdas, apps are not handled
+        Expr::Var(_) | Expr::Lambda(_, _) | Expr::App(_, _) | Expr::Prim(_) => None,
+    }
+}
+
 fn value_to_expr(val: &Value) -> Expr {
     match val {
         Value::Num(n) => Expr::Num(*n),
         Value::Bool(b) => Expr::Bool(*b),
+    }
+}
+
+fn is_value(expr: &Expr) -> bool {
+    matches!(expr, Expr::Num(_) | Expr::Bool(_))
+}
+
+fn expr_to_value(expr: &Expr) -> Value {
+    match expr {
+        Expr::Num(n) => Value::Num(*n),
+        Expr::Bool(b) => Value::Bool(*b),
+        _ => panic!("expr_to_value called on non-value"),
     }
 }
