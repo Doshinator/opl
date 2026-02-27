@@ -45,7 +45,6 @@ impl Context {
 pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     match ctx {
         Context::Hole => expr,
-
         // Arithemtic - Left Side
         Context::AddL(inner_ctx, right_expr) => {
             let filled = plug(inner_ctx, expr);
@@ -134,9 +133,11 @@ pub fn plug(ctx: &Context, expr: Expr) -> Expr {
     }
 }
 
-fn find_redex(expr: &Expr) -> Option<(Context, Expr)> {
+pub fn find_redex(expr: &Expr) -> Option<(Context, Expr)> {
     match expr {
-        Expr::Num(_) | Expr::Bool(_) => { None },
+        Expr::Num(_) | Expr::Bool(_) => {
+            Some((Context::Hole, expr.clone()))
+        },
         // Arithematic
         Expr::Add(l, r) => {
             if is_value(l) && is_value(r) {
