@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::{Expr, Value};
 
 // ex: (+ 1 (if (+ 2 []) 3 4)) -> AppC([+ 1] (If1C (AppC [+ 2] Hole []) 3 4) [])
@@ -210,5 +212,82 @@ where
         let left_val = expr_to_value(l);
         let (inner_ctx, redex) = find_redex(r)?;
         Some((make_right_ctx(left_val, Box::new(inner_ctx)), redex))
+    }
+}
+
+pub fn reduce(expr: &Expr) -> Expr {
+    match expr {
+        Expr::Num(n) => Expr::Num(n),
+        Expr::Bool(b) => Expr::Bool(b),
+        // Arithmetic
+        Expr::Add(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Num(a + b),
+                _ => panic!("Type error: + expects two numbers"),
+            }
+        },
+        Expr::Sub(l, r) => {
+             match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Num(a - b),
+                _ => panic!("Type error: - expects two numbers"),
+            }
+        },
+        Expr::Mul(l, r) => {
+             match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Num(a * b),
+                _ => panic!("Type error: * expects two numbers"),
+            }
+        },
+        Expr::Div(l, r) => {
+             match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => {
+                    if b == 0 {
+                        panic!("Division by zero");
+                    }
+                    Expr::Num(a / b)
+                },
+                _ => panic!("Type error: / expects two numbers"),
+            }
+        },
+        // comparison
+        Expr::Less(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Bool(a < b),
+                _ => panic!("Type error: < expects two numbers"),
+            }
+        },
+        Expr::LessEq(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Bool(a <= b),
+                _ => panic!("Type error: <= expects two numbers"),
+            }
+        },
+        Expr::Greater(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Bool(a > b),
+                _ => panic!("Type error: <= expects two numbers"),
+            }
+        },
+        Expr::GreaterEq(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Bool(a >= b),
+                _ => panic!("Type error: <= expects two numbers"),
+            }
+        },
+        Expr::Equal(l, r) => {
+            match (expr_to_value(l), expr_to_value(r)) {
+                (Value::Num(a), Value::Num(b)) => Expr::Bool(a == b),
+                _ => panic!("Type error: = expects two numbers"),
+            }
+        },
+        // If
+        Expr::If(cond, then_expr, else_expr) => {
+            match expr_to_value(cond) {
+                Value::Bool(true) => then_expr.as_ref().clone(),
+                Value::Bool(false) => else_expr.as_ref().clone(),
+                _ => panic!("Type error: if condition must be boolean"),
+            }
+        },
+        _ => panic!("reduce called on non-redex: {:?}", expr),
     }
 }
