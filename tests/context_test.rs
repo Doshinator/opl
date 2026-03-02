@@ -1,4 +1,4 @@
-use opl::{Context, Expr, Value, context::{find_redex, plug}};
+use opl::{Context, Expr, Value, context::{find_redex, plug, small_step_eval}, eval};
 
 #[test]
 fn context_hole() {
@@ -280,4 +280,62 @@ fn find_redex_simple_add() {
     assert!(result.is_some());
     let (ctx, _redex) = result.unwrap();
     assert_eq!(ctx, Context::Hole);
+}
+
+#[test]
+fn test_small_step_simple() {
+    let expr = Expr::Num(42);
+    assert_eq!(small_step_eval(expr), Value::Num(42));
+}
+
+#[test]
+fn test_small_step_add() {
+    let expr = Expr::Add(
+        Box::new(Expr::Num(2)),
+        Box::new(Expr::Num(3))
+    );
+    assert_eq!(small_step_eval(expr), Value::Num(5));
+}
+
+#[test]
+fn test_small_step_nested() {
+    // (+ 2 (* 3 4))
+    let expr = Expr::Add(
+        Box::new(Expr::Num(2)),
+        Box::new(Expr::Mul(
+            Box::new(Expr::Num(3)),
+            Box::new(Expr::Num(4))
+        ))
+    );
+    assert_eq!(small_step_eval(expr), Value::Num(14));
+}
+
+#[test]
+fn test_small_step_matches_eval() {
+    let expr = Expr::Add(
+        Box::new(Expr::Mul(
+            Box::new(Expr::Num(2)),
+            Box::new(Expr::Num(3))
+        )),
+        Box::new(Expr::Num(4))
+    );
+    
+    let big_step = eval(&expr);
+    let small_step = small_step_eval(expr.clone());
+    
+    assert_eq!(big_step, small_step);
+}
+
+#[test]
+fn test_small_step_if() {
+    // (if (< 2 3) 10 20)
+    let expr = Expr::If(
+        Box::new(Expr::Less(
+            Box::new(Expr::Num(2)),
+            Box::new(Expr::Num(3))
+        )),
+        Box::new(Expr::Num(10)),
+        Box::new(Expr::Num(20))
+    );
+    assert_eq!(small_step_eval(expr), Value::Num(10));
 }
