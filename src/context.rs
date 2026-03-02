@@ -217,8 +217,8 @@ where
 
 pub fn reduce(expr: &Expr) -> Expr {
     match expr {
-        Expr::Num(n) => Expr::Num(n),
-        Expr::Bool(b) => Expr::Bool(b),
+        Expr::Num(n) => Expr::Num(*n),
+        Expr::Bool(b) => Expr::Bool(*b),
         // Arithmetic
         Expr::Add(l, r) => {
             match (expr_to_value(l), expr_to_value(r)) {
@@ -265,13 +265,13 @@ pub fn reduce(expr: &Expr) -> Expr {
         Expr::Greater(l, r) => {
             match (expr_to_value(l), expr_to_value(r)) {
                 (Value::Num(a), Value::Num(b)) => Expr::Bool(a > b),
-                _ => panic!("Type error: <= expects two numbers"),
+                _ => panic!("Type error: > expects two numbers"),
             }
         },
         Expr::GreaterEq(l, r) => {
             match (expr_to_value(l), expr_to_value(r)) {
                 (Value::Num(a), Value::Num(b)) => Expr::Bool(a >= b),
-                _ => panic!("Type error: <= expects two numbers"),
+                _ => panic!("Type error: >= expects two numbers"),
             }
         },
         Expr::Equal(l, r) => {
@@ -289,5 +289,31 @@ pub fn reduce(expr: &Expr) -> Expr {
             }
         },
         _ => panic!("reduce called on non-redex: {:?}", expr),
+    }
+}
+
+fn small_step(expr: &Expr) -> Option<Expr> {
+    let (ctx, redex) = find_redex(&expr)?;
+
+    if ctx.is_hole() && is_value(&redex) {
+        return None;
+    }
+
+    let reduced = reduce(&redex);
+    Some(plug(&ctx, reduced))
+}
+
+pub fn small_step_eval(expr: Expr) -> Value {
+    let mut current = expr;
+
+    loop {
+        match small_step(&current) {
+            None => {
+                return expr_to_value(&current);
+            },
+            Some(next_expr) => {
+                current = next_expr;
+            },
+        }
     }
 }
