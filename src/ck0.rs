@@ -2,6 +2,8 @@ use core::panic;
 use crate::{Expr, Value};
 
 pub type Kontinuation = Vec<Frame>;
+
+#[derive(Debug, Clone)]
 pub enum Frame {
     // Artithmetic Left side
     AddL(Box<Expr>),
@@ -29,6 +31,7 @@ pub enum Frame {
     IfK(Box<Expr>, Box<Expr>),
 }
 
+#[derive(Debug, Clone)]
 struct State {
     control: Expr,
     kontinuation: Kontinuation,
