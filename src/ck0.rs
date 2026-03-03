@@ -1,7 +1,7 @@
-use crate::{Context, Expr, Value};
+use core::panic;
+use crate::{Expr, Value};
 
 pub type Kontinuation = Vec<Frame>;
-
 pub enum Frame {
     // Artithmetic Left side
     AddL(Box<Expr>),
@@ -29,17 +29,24 @@ pub enum Frame {
     IfK(Box<Expr>, Box<Expr>),
 }
 
-struct Machine {
+struct State {
     control: Expr,
     kontinuation: Kontinuation,
 }
 
-
-
-fn inject(expr: Expr) -> (Expr, Context) {
-    todo!()
+fn inject(expr: Expr) -> State {
+    State {
+        control: expr,
+        kontinuation: vec!  [],
+    }
 }
 
-fn extract((value, Kret): (Value, Machine)) -> Value {
-    todo!()
+fn extract(state: &State) -> Value {
+    assert!(state.kontinuation.is_empty(), "extract called on a non-final state");
+
+    match &state.control {
+        Expr::Num(n) => Value::Num(*n),
+        Expr::Bool(b) => Value::Bool(*b),
+        _ => panic!("extract called on a non-value {:?}", &state.control),
+    }
 }
