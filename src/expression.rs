@@ -47,7 +47,10 @@ pub enum Expr {
     // Functions
     Lambda(Vec<String>, Box<Expr>), // (param, body)
 
-    // Application
+    // Application, a.k.a calling a function 
+    //((λ (x) (+ x 1)) 5) == App(Lambda([x], Expr::Add(Expr::Var(x), Expr::Num(1)), Expr::Num(5)))
+    //  ↑              ↑
+    //  Function       Argument
     App(Box<Expr>, Vec<Expr>), // (function, args)
 }
 
