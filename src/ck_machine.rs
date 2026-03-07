@@ -49,10 +49,6 @@ fn extract(state: &State) -> Value {
     expr_to_value(&state.control)
 }
 
-fn is_value(expr: &Expr) -> bool {
-    matches!(expr, Expr::Num(_) | Expr::Bool(_))
-}
-
 fn expr_to_value(expr: &Expr) -> Value {
     match expr {
         Expr::Num(n) => Value::Num(*n),
