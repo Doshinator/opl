@@ -172,6 +172,7 @@ fn value_to_expr(val: &Value) -> Expr {
     match val {
         Value::Num(n) => Expr::Num(*n),
         Value::Bool(b) => Expr::Bool(*b),
+        _ => panic!("Value is non Num | Bool.  Value: {:?}", val),
     }
 }
 
