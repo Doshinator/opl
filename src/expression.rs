@@ -1,4 +1,5 @@
 use core::panic;
+use std::collections::HashMap;
 
 /**
  * Expr = 
@@ -15,11 +16,12 @@ use core::panic;
 
  */
 
+type Env = HashMap<String, Value>;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
     Num(i32),
     Bool(bool),
-    Var(String),
     Prim(Prim),
 
     // Binary
@@ -38,11 +40,15 @@ pub enum Expr {
     // Conditionals
     If(Box<Expr>, Box<Expr>, Box<Expr>),
 
+    // ---- J2 -------
+    // Var
+    Var(String),
+
     // Functions
-    Lambda(Vec<String>, Box<Expr>),
+    Lambda(Vec<String>, Box<Expr>), // (param, body)
 
     // Application
-    App(Box<Expr>, Vec<Expr>),
+    App(Box<Expr>, Vec<Expr>), // (function, args)
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -62,6 +68,11 @@ pub enum Prim {
 pub enum Value {
     Num(i32),
     Bool(bool),
+    Closure {
+        params: Vec<String>, // ["id", "name", ...]
+        body: Box<Expr>, // (+ x y)
+        env: Env, // ex. ["id": "55735", "name": "Bob", ...]
+    },
 }
 
 pub fn eval(expr: &Expr) -> Value {
