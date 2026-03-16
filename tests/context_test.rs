@@ -1,4 +1,4 @@
-use opl::{Context, Expr, Value, context::{find_redex, plug, small_step_eval}, eval};
+use opl::{Context, Expr, Value, context::{find_redex, plug, small_step_eval}, eval, expression::Env};
 
 #[test]
 fn context_hole() {
@@ -312,6 +312,7 @@ fn test_small_step_nested() {
 
 #[test]
 fn test_small_step_matches_eval() {
+    let env = Env::new();
     let expr = Expr::Add(
         Box::new(Expr::Mul(
             Box::new(Expr::Num(2)),
@@ -320,7 +321,7 @@ fn test_small_step_matches_eval() {
         Box::new(Expr::Num(4))
     );
     
-    let big_step = eval(&expr);
+    let big_step = eval(&expr, &env);
     let small_step = small_step_eval(expr.clone());
     
     assert_eq!(big_step, small_step);

@@ -1,4 +1,4 @@
-use opl::{Expr, desugar::desugar, eval, expression::Value, s_expression::SExpr};
+use opl::{Expr, desugar::desugar, eval, expression::{Env, Value}, s_expression::SExpr};
 
 
 #[test]
@@ -94,6 +94,7 @@ fn desugar_nested() {
 
 #[test]
 fn desugar_then_eval() {
+    let env = Env::new();
     // (+ 2 (* 3 4)) = 14
     let se = SExpr::List(vec![
         SExpr::Sym("+".into()),
@@ -106,7 +107,7 @@ fn desugar_then_eval() {
     ]);
 
     let expr = desugar(&se);
-    let result = eval(&expr);
+    let result = eval(&expr, &env);
 
     assert_eq!(Value::Num(14), result);
 }

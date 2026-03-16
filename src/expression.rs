@@ -16,7 +16,7 @@ use std::collections::HashMap;
 
  */
 
-type Env = HashMap<String, Value>;
+pub type Env = HashMap<String, Value>;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
@@ -78,30 +78,30 @@ pub enum Value {
     },
 }
 
-pub fn eval(expr: &Expr) -> Value {
+pub fn eval(expr: &Expr, env: &Env) -> Value {
     match expr {
         Expr::Num(n) => Value::Num(*n),
         Expr::Bool(b) => Value::Bool(*b),
         Expr::Add(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => Value::Num(a + b),
                 _ => panic!("Type error: + expects two numbers"),
             }
         },
         Expr::Mul(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => Value::Num(a * b),
                 _ => panic!("Type error: * expects two numbers"),
             }
         },
         Expr::Sub(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => Value::Num(a - b),
                 _ => panic!("Type error: - expects two numbers"),
             }
         },
         Expr::Div(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     if b == 0 {
                         panic!("divide by zero error");
@@ -112,7 +112,7 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::Less(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     Value::Bool(a < b)
                 },
@@ -120,7 +120,7 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::LessEq(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     Value::Bool(a <= b)
                 },
@@ -128,7 +128,7 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::Greater(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     Value::Bool(a > b)
                 },
@@ -136,7 +136,7 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::GreaterEq(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     Value::Bool(a >= b)
                 },
@@ -144,7 +144,7 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::Equal(l, r) => {
-            match (eval(l), eval(r)) {
+            match (eval(l, env), eval(r, env)) {
                 (Value::Num(a), Value::Num(b)) => {
                     Value::Bool(a == b)
                 },
@@ -152,15 +152,53 @@ pub fn eval(expr: &Expr) -> Value {
             }
         },
         Expr::If(cond, then_expr, else_expr) => {
-            match eval(cond) {
-                Value::Bool(true) => eval(then_expr),
-                Value::Bool(false) => eval(else_expr),
+            match eval(cond, env) {
+                Value::Bool(true) => eval(then_expr, env),
+                Value::Bool(false) => eval(else_expr, env),
                 _ => panic!("Type error: if condition must be a boolean"),
             }
         },
-        Expr::Var(_) => panic!("Variables not yet implemented (needed for J2+)"),
-        Expr::Lambda(_, _) => panic!("Lambda not yet implemented (needed for J2+)"),
-        Expr::App(_, _) => panic!("Application not yet implemented (needed for J2+)"),
+        Expr::Var(name) => {
+            env.get(name)
+                .cloned()
+                .unwrap_or_else(|| panic!("Unbound variable: {}", name))
+        },
+        Expr::Lambda(param, body) => {
+            Value::Closure { 
+                params: param.clone(), 
+                body: body.clone(), 
+                env: env.clone() 
+            }
+        },
+        Expr::App(func_expr, args_expr) => {
+            let func = eval(func_expr, env);
+
+            let args: Vec<Value> = args_expr
+                .iter()
+                .map(|args| eval(args, env))
+                .collect();
+
+            match func {
+                Value::Closure { params, body, env: closur_env } => {
+                    if params.len() != args.len() {
+                        panic!(
+                            "Arity mismatch: expected {} args, got {}",
+                            params.len(),
+                            args.len()
+                        );
+                    }
+                
+                    let mut new_env = closur_env.clone();
+
+                    for (param, arg) in params.iter().zip(args.iter()) {
+                        new_env.insert(param.clone(), arg.clone());
+                    }
+
+                    eval(&body, &new_env)
+                },
+                _ => panic!("Attempted to call non-function: {:?}", func),
+            }
+        },
         Expr::Prim(_) => panic!("Primitives not yet implemented"),
     }
 }

@@ -1,29 +1,32 @@
-use opl::{desugar, expression::{Expr, Value, eval}, reader};
+use opl::{desugar, expression::{Env, Expr, Value, eval}, reader};
 
 #[test]
 fn eval_num() {
+    let env = Env::new();
     let e = Expr::Num(5);
-    let n = eval(&e);
+    let n = eval(&e, &env);
     assert_eq!(Value::Num(5), n);
 }
 
 #[test]
 fn eval_add() {
+    let env = Env::new();
     let e = Expr::Add(
         Box::new(Expr::Num(3)),
         Box::new(Expr::Num(-4))
     );
-    let n = eval(&e);
+    let n = eval(&e, &env);
     assert_eq!(Value::Num(-1), n);
 }
 
 #[test]
 fn eval_multiply() {
+    let env = Env::new();
     let e = Expr::Mul(
         Box::new(Expr::Num(3)),
         Box::new(Expr::Num(-4))
     );
-    let n = eval(&e);
+    let n = eval(&e, &env);
     assert_eq!(Value::Num(-12), n);
 }
 
@@ -228,9 +231,10 @@ fn j1_complex_condition() {
 
 // Helper function to run the program
 fn run(program: &str) -> i32 {
+    let env = Env::new();
     let sexpr = reader(program);
     let expr = desugar(&sexpr);
-    let result = eval(&expr);
+    let result = eval(&expr, &env);
     match result {
         Value::Num(n) => n,
         _ => panic!("Expected numeric result, got {:?}", result),
@@ -238,9 +242,10 @@ fn run(program: &str) -> i32 {
 }
 
 fn run_bool(program: &str) -> bool {
+    let env = Env::new();
     let sexpr = reader(program);
     let expr = desugar(&sexpr);
-    let result = eval(&expr);
+    let result = eval(&expr, &env);
     match result {
         Value::Bool(b) => b,
         _ => panic!("Expected boolean result, got {:?}", result),
