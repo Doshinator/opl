@@ -251,3 +251,83 @@ fn run_bool(program: &str) -> bool {
         _ => panic!("Expected boolean result, got {:?}", result),
     }
 }
+
+// ============================================================================
+// J2 TESTS 
+// ============================================================================
+
+#[test]
+fn test_variable() {
+    let mut env = Env::new();
+    env.insert("x".to_string(), Value::Num(42));
+    
+    let expr = Expr::Var("x".to_string());
+    let result = eval(&expr, &env);
+    
+    assert_eq!(result, Value::Num(42));
+}
+
+#[test]
+fn test_lambda_call() {
+    let env = Env::new();
+    
+    // ((λ (x) (+ x 1)) 5)
+    let expr = Expr::App(
+        Box::new(Expr::Lambda(
+            vec!["x".to_string()],
+            Box::new(Expr::Add(
+                Box::new(Expr::Var("x".to_string())),
+                Box::new(Expr::Num(1))
+            ))
+        )),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(6));
+}
+
+#[test]
+fn test_closure() {
+    // Create environment with x=10
+    let mut env = Env::new();
+    env.insert("x".to_string(), Value::Num(10));
+    
+    // Create lambda (λ (y) (+ x y)) - captures x=10
+    let lambda = Expr::Lambda(
+        vec!["y".to_string()],
+        Box::new(Expr::Add(
+            Box::new(Expr::Var("x".to_string())),
+            Box::new(Expr::Var("y".to_string()))
+        ))
+    );
+    
+    // Now call the closure with y=5
+    let app = Expr::App(
+        Box::new(lambda.clone()),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&app, &env);
+    assert_eq!(result, Value::Num(15));  // 10 + 5
+}
+
+#[test]
+fn test_multi_arg() {
+    let env = Env::new();
+    
+    // ((λ (x y) (+ x y)) 3 4)
+    let expr = Expr::App(
+        Box::new(Expr::Lambda(
+            vec!["x".to_string(), "y".to_string()],
+            Box::new(Expr::Add(
+                Box::new(Expr::Var("x".to_string())),
+                Box::new(Expr::Var("y".to_string()))
+            ))
+        )),
+        vec![Expr::Num(3), Expr::Num(4)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(7));
+}
