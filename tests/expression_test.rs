@@ -331,3 +331,256 @@ fn test_multi_arg() {
     let result = eval(&expr, &env);
     assert_eq!(result, Value::Num(7));
 }
+
+
+// ============================================================================
+// J2 Tests - Functions and Closures
+// ============================================================================
+
+#[test]
+fn test_simple_lambda_application() {
+    let env = Env::new();
+    
+    // ((λ (x) (+ x 1)) 5)
+    let expr = Expr::App(
+        Box::new(Expr::Lambda(
+            vec!["x".to_string()],
+            Box::new(Expr::Add(
+                Box::new(Expr::Var("x".to_string())),
+                Box::new(Expr::Num(1))
+            ))
+        )),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(6));
+}
+
+#[test]
+fn test_multi_argument_function() {
+    let env = Env::new();
+    
+    // ((λ (x y) (+ x y)) 3 4)
+    let expr = Expr::App(
+        Box::new(Expr::Lambda(
+            vec!["x".to_string(), "y".to_string()],
+            Box::new(Expr::Add(
+                Box::new(Expr::Var("x".to_string())),
+                Box::new(Expr::Var("y".to_string()))
+            ))
+        )),
+        vec![Expr::Num(3), Expr::Num(4)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(7));
+}
+
+#[test]
+fn test_closure_captures_environment() {
+    // Create environment with x=10
+    let mut env = Env::new();
+    env.insert("x".to_string(), Value::Num(10));
+    
+    // (λ (y) (+ x y)) - captures x=10
+    let lambda = Expr::Lambda(
+        vec!["y".to_string()],
+        Box::new(Expr::Add(
+            Box::new(Expr::Var("x".to_string())),
+            Box::new(Expr::Var("y".to_string()))
+        ))
+    );
+    
+    // Call with y=5
+    let app = Expr::App(
+        Box::new(lambda),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&app, &env);
+    assert_eq!(result, Value::Num(15)); // 10 + 5
+}
+
+#[test]
+fn test_higher_order_function() {
+    let env = Env::new();
+    
+    // Double function: (λ (n) (* n 2))
+    let double = Expr::Lambda(
+        vec!["n".to_string()],
+        Box::new(Expr::Mul(
+            Box::new(Expr::Var("n".to_string())),
+            Box::new(Expr::Num(2))
+        ))
+    );
+    
+    // Apply function: (λ (f x) (f x))
+    let apply = Expr::Lambda(
+        vec!["f".to_string(), "x".to_string()],
+        Box::new(Expr::App(
+            Box::new(Expr::Var("f".to_string())),
+            vec![Expr::Var("x".to_string())]
+        ))
+    );
+    
+    // ((λ (f x) (f x)) (λ (n) (* n 2)) 5)
+    let expr = Expr::App(
+        Box::new(apply),
+        vec![double, Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(10)); // double(5) = 10
+}
+
+#[test]
+fn test_currying() {
+    let env = Env::new();
+    
+    // Inner lambda: (λ (y) (+ x y))
+    let inner = Expr::Lambda(
+        vec!["y".to_string()],
+        Box::new(Expr::Add(
+            Box::new(Expr::Var("x".to_string())),
+            Box::new(Expr::Var("y".to_string()))
+        ))
+    );
+    
+    // Outer lambda: (λ (x) (λ (y) (+ x y)))
+    let outer = Expr::Lambda(
+        vec!["x".to_string()],
+        Box::new(inner)
+    );
+    
+    // First application: bind x=10
+    let step1 = Expr::App(
+        Box::new(outer),
+        vec![Expr::Num(10)]
+    );
+    
+    // Second application: bind y=5
+    let expr = Expr::App(
+        Box::new(step1),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(15)); // 10 + 5
+}
+
+#[test]
+fn test_apply_function_twice() {
+    let env = Env::new();
+    
+    // Add one: (λ (n) (+ n 1))
+    let add_one = Expr::Lambda(
+        vec!["n".to_string()],
+        Box::new(Expr::Add(
+            Box::new(Expr::Var("n".to_string())),
+            Box::new(Expr::Num(1))
+        ))
+    );
+    
+    // Apply twice: (λ (f x) (f (f x)))
+    let apply_twice = Expr::Lambda(
+        vec!["f".to_string(), "x".to_string()],
+        Box::new(Expr::App(
+            Box::new(Expr::Var("f".to_string())),
+            vec![Expr::App(
+                Box::new(Expr::Var("f".to_string())),
+                vec![Expr::Var("x".to_string())]
+            )]
+        ))
+    );
+    
+    // ((λ (f x) (f (f x))) (λ (n) (+ n 1)) 5)
+    let expr = Expr::App(
+        Box::new(apply_twice),
+        vec![add_one, Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(7)); // 5 + 1 + 1
+}
+
+#[test]
+fn test_conditional_returns_function() {
+    let env = Env::new();
+    
+    // Doubler: (λ (x) (* x 2))
+    let doubler = Expr::Lambda(
+        vec!["x".to_string()],
+        Box::new(Expr::Mul(
+            Box::new(Expr::Var("x".to_string())),
+            Box::new(Expr::Num(2))
+        ))
+    );
+    
+    // Tripler: (λ (x) (* x 3))
+    let tripler = Expr::Lambda(
+        vec!["x".to_string()],
+        Box::new(Expr::Mul(
+            Box::new(Expr::Var("x".to_string())),
+            Box::new(Expr::Num(3))
+        ))
+    );
+    
+    // if (< 2 3) then doubler else tripler
+    let if_expr = Expr::If(
+        Box::new(Expr::Less(
+            Box::new(Expr::Num(2)),
+            Box::new(Expr::Num(3))
+        )),
+        Box::new(doubler),
+        Box::new(tripler)
+    );
+    
+    // Apply result to 5
+    let expr = Expr::App(
+        Box::new(if_expr),
+        vec![Expr::Num(5)]
+    );
+    
+    let result = eval(&expr, &env);
+    assert_eq!(result, Value::Num(10)); // 2 < 3 is true, so use doubler
+}
+
+#[test]
+fn test_variable_lookup() {
+    let mut env = Env::new();
+    env.insert("x".to_string(), Value::Num(42));
+    
+    let expr = Expr::Var("x".to_string());
+    let result = eval(&expr, &env);
+    
+    assert_eq!(result, Value::Num(42));
+}
+
+#[test]
+#[should_panic(expected = "Unbound variable")]
+fn test_unbound_variable() {
+    let env = Env::new();
+    let expr = Expr::Var("x".to_string());
+    eval(&expr, &env); // Should panic
+}
+
+#[test]
+#[should_panic(expected = "Arity mismatch")]
+fn test_arity_mismatch() {
+    let env = Env::new();
+    
+    // ((λ (x y) (+ x y)) 5) - missing one argument
+    let expr = Expr::App(
+        Box::new(Expr::Lambda(
+            vec!["x".to_string(), "y".to_string()],
+            Box::new(Expr::Add(
+                Box::new(Expr::Var("x".to_string())),
+                Box::new(Expr::Var("y".to_string()))
+            ))
+        )),
+        vec![Expr::Num(5)] // Only one arg, need two
+    );
+    
+    eval(&expr, &env); // Should panic
+}
