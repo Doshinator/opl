@@ -12,7 +12,7 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
             match s.as_str() {
                 "true" => Expr::Bool(true),
                 "false" => Expr::Bool(false),
-                _ => panic!("Unexpected symbol {}", s),
+                _ => Expr::Var(s.clone()),
             }
         },
         SExpr::List(list) => {
@@ -25,6 +25,19 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
             match first {
                 SExpr::Sym(op) => {
                     match op.as_str() {
+                        "λ" | "lambda" => {
+                            if rest.len() != 2 {
+                                panic!("lambda expects 2 args: (λ (params...) body)");
+                            }
+                            
+                            // Extract parameters from (x y z)
+                            let params = extract_params(&rest[0]);
+                            
+                            // Desugar the body
+                            let body = desugar(&rest[1]);
+                            
+                            Expr::Lambda(params, Box::new(body))
+                        },
                         "+" => desugar_binary_op(op, rest),
                         "-" => desugar_binary_op(op, rest),
                         "*" => desugar_binary_op(op, rest),
@@ -49,12 +62,38 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                                 Box::new(else_expr)
                             )
                         },
-                        _ => panic!("Unknown operator: {}", op),
+                        _ => {
+                            // Not a known operator, treat as function application
+                            // (f arg1 arg2) where f is a variable
+                            let func = Expr::Var(op.clone());
+                            let args: Vec<Expr> = rest.iter().map(desugar).collect();
+                            Expr::App(Box::new(func), args)
+                        },
                     }
                 },
-                _ => panic!("First element must be a symbole"),
+                _ => {
+                    // First element is not a symbol (could be a lambda)
+                    // Example: ((λ (x) x) 5)
+                    let func = desugar(first);
+                    let args: Vec<Expr> = rest.iter().map(desugar).collect();
+                    Expr::App(Box::new(func), args)
+                }
             }
         },
+    }
+}
+
+fn extract_params(sexpr: &SExpr) -> Vec<String> {
+    match sexpr {
+        SExpr::List(items) => {
+            items.iter().map(|item| {
+                match item {
+                    SExpr::Sym(name) => name.clone(),
+                    _ => panic!("Parameter must be a symbol, got: {:?}", item),
+                }
+            }).collect()
+        },
+        _ => panic!("Parameters must be a list, got: {:?}", sexpr),
     }
 }
 
