@@ -1,4 +1,4 @@
-use opl::expression::{Expr, eval, pretty_print};
+use opl::expression::{Env, Expr, eval, pretty_print};
 
 fn main() {
     println!("---- Start -----");
@@ -9,9 +9,10 @@ fn main() {
             Box::new(Expr::Num(4))
         )),
     );
+    let env = Env::new();
     println!("{} = {:?}", 
         pretty_print(&e),
-        eval(&e)
+        eval(&e, &env)
     );
     println!("---- End -----");
 }
