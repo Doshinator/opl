@@ -1,4 +1,4 @@
-use opl::{Expr, desugar::desugar, eval, expression::{Env, Value}, s_expression::SExpr};
+use opl::{Expr, desugar::desugar, eval, expression::{Env, Value}, reader, s_expression::SExpr};
 
 
 #[test]
@@ -110,4 +110,86 @@ fn desugar_then_eval() {
     let result = eval(&expr, &env);
 
     assert_eq!(Value::Num(14), result);
+}
+
+// ======
+// let tests
+// ======
+
+#[test]
+fn lambda_and_let_equal() {
+    // Arrange
+    let env = Env::new();
+    let lambda_s = "((λ (x y) (+ x y)) 3 4)";
+    let let_s = "(let ((x 3) (y 4)) (+ x y))";
+
+    let program_lambda = reader(&lambda_s);
+    let program_let = reader(&let_s);
+
+    let expr_lambda = desugar(&program_lambda);
+    let expr_let = desugar(&program_let);
+
+    assert_eq!(expr_lambda, expr_let);
+    assert_eq!(Value::Num(7), eval(&expr_lambda, &env));
+    assert_eq!(Value::Num(7), eval(&expr_let, &env));
+}
+
+#[test]
+fn desugar_simple_test_let() {
+    // Arrange
+    let env = Env::new();
+    let s = "(let ((x 5)) (+ x 1))";
+    let program = reader(&s);
+    let expr = desugar(&program);
+
+    // Act
+    let result = eval(&expr, &env);
+
+    // Assert
+    assert_eq!(result, Value::Num(6));
+}
+
+#[test]
+fn test_multiple_bindings() {
+    // Arrange
+    let env = Env::new();
+    let s = "(let ((x 5) (y 10)) (+ x y))";
+    let program = reader(&s);
+    let expr = desugar(&program);
+
+    // Act
+    let result = eval(&expr, &env);
+
+    // Arrange
+    assert_eq!(result, Value::Num(15));
+}
+
+#[test]
+fn test_nested_let() {
+    // Arrange
+    let env = Env::new();
+    let s = "(let ((x 5)) (let ((y 10)) (+ x y)))";
+    let program = reader(&s);
+    let expr = desugar(&program);
+
+    // Act
+    let result = eval(&expr, &env);
+
+    // Assert
+    assert_eq!(result, Value::Num(15));
+}
+
+#[test]
+fn test_let_with_lambda() {
+    // Arrange
+    let env = Env::new();
+    let s = "(let ((double (λ (x) (* x 2)))) (double 5))";
+    let program = reader(&s);
+    let expr = desugar(&program);
+
+    // Act
+    let result = eval(&expr, &env);
+
+    // Assert
+    assert_eq!(result, Value::Num(10));
 }

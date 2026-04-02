@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::{Expr, s_expression::SExpr};
 
 // SExpr -> Expr
@@ -37,6 +39,29 @@ pub fn desugar(sexpr: &SExpr) -> Expr {
                             let body = desugar(&rest[1]);
                             
                             Expr::Lambda(params, Box::new(body))
+                        },
+                        "let" => {
+                            if rest.len() != 2 {
+                                panic!("let expects 2 arguments: (let ((bindings...)) body)");
+                            }
+                            
+                            // Extract bindings
+                            let bindings = extract_let_bindings(&rest[0]);
+                            
+                            let body = desugar(&rest[1]);
+                            
+                            // Split bindings into params and args
+                            let params: Vec<String> = bindings.iter()
+                                .map(|(name, _)| name.clone())
+                                .collect();
+
+                            let args: Vec<Expr> = bindings.iter()
+                                .map(|(_, expr)| expr.clone())
+                                .collect();
+
+                            Expr::App(
+                                Box::new(Expr::Lambda(params, Box::new(body))), 
+                                args)
                         },
                         "+" => desugar_binary_op(op, rest),
                         "-" => desugar_binary_op(op, rest),
@@ -146,5 +171,26 @@ fn desugar_conditional(op: &str, rest: &[SExpr]) -> Expr {
             Expr::Equal(Box::new(left), Box::new(right))
         },
         _ => panic!("{} is not a supported conditional operator", op),
+    }
+}
+
+fn extract_let_bindings(sexpr: &SExpr) -> Vec<(String, Expr)> {
+    match sexpr {
+        SExpr::List(bindings) => {
+            bindings.iter().map(|binding| {
+                match binding {
+                    SExpr::List(pair) if pair.len() == 2 => {
+                        let name = match &pair[0] {
+                            SExpr::Sym(s) => s.clone(),
+                            _ => panic!("Binding name must be symbol"),
+                        };
+                        let value = desugar(&pair[1]);
+                        (name, value)
+                    },
+                    _ => panic!("Each binding must be (name value)"),
+                }
+            }).collect()
+        },
+        _ => panic!("Let bindings must be a list"),
     }
 }
